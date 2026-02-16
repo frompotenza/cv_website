@@ -11,8 +11,8 @@
       font-family: 'Courier New', Courier, monospace;
       padding: 20px;
       margin: 0;
-      /* Allow the body to scroll naturally */
-      min-height: 100vh;
+      /* The page starts with no height and grows with the text */
+      min-height: auto;
       overflow-y: auto;
       text-shadow: 0 0 5px #2ecc71;
     }
@@ -22,7 +22,6 @@
       content: " ";
       display: block;
       position: fixed;
-      /* Fixed so it stays over the viewport while scrolling */
       top: 0;
       left: 0;
       bottom: 0;
@@ -35,21 +34,20 @@
     }
 
     #terminal-container {
-      display: block;
+      display: flex;
+      flex-direction: column;
       z-index: 1;
     }
 
-    #terminal-history div,
-    #terminal-history pre {
+    /* Standardizes vertical stacking for all history entries */
+    #terminal-history div {
+      display: block;
+      width: 100%;
       white-space: pre-wrap;
       word-wrap: break-word;
       margin: 0;
-      /* Removes extra space between blocks */
       padding: 0;
-      /* Removes internal spacing */
       line-height: 1.2;
-      /* Forces a tighter, terminal-like vertical rhythm */
-      display: block;
     }
 
     .input-line {
@@ -80,13 +78,13 @@
       font-weight: bold;
     }
   </style>
+</head>
 
 <body>
   <div id="terminal-container">
     <div id="terminal-history">
       <div>--- Welcome to Felipe Potenza's CV ---</div>
       <div>Type 'help' to see available commands.</div>
-      <br>
     </div>
 
     <div class="input-line">
@@ -100,7 +98,6 @@
     const history = document.getElementById('terminal-history');
     const promptLabel = document.querySelector('.prompt');
 
-    // The "Virtual File System"
     const fileSystem = {
       'about_me': {
         'personal_info.txt': "file_system/personal_info.txt",
@@ -109,7 +106,7 @@
         'hobbies.txt': "file_system/hobbies.txt"
       },
       'experience': {
-        'work_experience.txt': "file_system/work_experience.txt.",
+        'work_experience.txt': "file_system/work_experience.txt",
         'projects.txt': "file_system/projects.txt"
       },
       'contact.txt': "file_system/contact.txt",
@@ -120,15 +117,17 @@
 
     function typeOutput(text, element) {
       let i = 0;
-      // Clean the text: remove \r and trim trailing newlines
       const cleanText = text.trimEnd().replace(/\r/g, "");
 
       const interval = setInterval(() => {
         element.innerText += cleanText.charAt(i);
         i++;
+
+        // Follow the text as it types
+        window.scrollTo(0, document.body.scrollHeight);
+
         if (i >= cleanText.length) {
           clearInterval(interval);
-          window.scrollTo(0, document.body.scrollHeight);
         }
       }, 10);
     }
@@ -139,28 +138,22 @@
 
     let commandHistory = [];
     let historyIndex = -1;
-    let currentInputBuffer = ""; // Stores what you were typing before you hit 'Up'
+    let currentInputBuffer = "";
 
     input.addEventListener('keydown', (e) => {
       const currentDir = getCurrentDir();
       const items = Object.keys(currentDir);
 
-      // --- ARROW UP (Previous Command) ---
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (commandHistory.length > 0) {
-          if (historyIndex === -1) {
-            currentInputBuffer = input.value; // Save current progress
-          }
-
+          if (historyIndex === -1) currentInputBuffer = input.value;
           if (historyIndex < commandHistory.length - 1) {
             historyIndex++;
             input.value = commandHistory[commandHistory.length - 1 - historyIndex];
           }
         }
       }
-
-      // --- ARROW DOWN (Next Command) ---
       else if (e.key === 'ArrowDown') {
         e.preventDefault();
         if (historyIndex > 0) {
@@ -168,11 +161,9 @@
           input.value = commandHistory[commandHistory.length - 1 - historyIndex];
         } else if (historyIndex === 0) {
           historyIndex = -1;
-          input.value = currentInputBuffer; // Restore what you were typing
+          input.value = currentInputBuffer;
         }
       }
-
-      // --- TAB COMPLETION ---
       else if (e.key === 'Tab') {
         e.preventDefault();
         const parts = input.value.split(' ');
@@ -190,38 +181,33 @@
           window.scrollTo(0, document.body.scrollHeight);
         }
       }
-
-      // --- ENTER KEY ---
       else if (e.key === 'Enter') {
         const fullInput = input.value.trim();
-
-        if (fullInput) {
-          // Add to history and reset index
-          commandHistory.push(fullInput);
-          historyIndex = -1;
-          currentInputBuffer = "";
-        } else {
-          // Allow empty Enter to just move to next line like a real terminal
-          const blankLine = document.createElement('div');
-          blankLine.innerHTML = `<span style="color:#8e44ad">${promptLabel.innerText}</span>`;
-          history.appendChild(blankLine);
-          input.value = '';
-          return;
-        }
-
-        const [command, ...args] = fullInput.toLowerCase().split(' ');
-        const arg = args[0];
 
         const outputLine = document.createElement('div');
         outputLine.innerHTML = `<span style="color:#8e44ad">${promptLabel.innerText}</span> ${fullInput}`;
         history.appendChild(outputLine);
 
-        const response = document.createElement('div');
-        const currentDir = getCurrentDir();
+        if (fullInput) {
+          commandHistory.push(fullInput);
+          historyIndex = -1;
+          currentInputBuffer = "";
+        } else {
+          input.value = '';
+          window.scrollTo(0, document.body.scrollHeight);
+          return;
+        }
 
+        const [command, ...args] = fullInput.toLowerCase().split(' ');
+        const arg = args[0];
+        const response = document.createElement('div');
+
+        // FIXED CLEAR: Uses <div> elements to maintain stack
         if (command === 'clear') {
-          history.innerHTML = "--- Welcome to Felipe Potenza's Interactive CV ---\nType 'help' to see available commands.";
+          history.innerHTML = "<div>--- Welcome to Felipe Potenza's CV ---</div><div>Type 'help' to see available commands.</div>";
+          input.value = '';
           window.scrollTo(0, 0);
+          return;
         } else if (command === 'ls') {
           const formattedItems = Object.keys(currentDir).map(item =>
             typeof currentDir[item] === 'object' ? `<span class="dir">${item}/</span>` : item
@@ -240,26 +226,16 @@
         } else if (command === 'cat') {
           const filePath = currentDir[arg];
           if (filePath && typeof filePath === 'string') {
-            // 1. Fetch the file content
             fetch(filePath)
-              .then(response => {
-                if (!response.ok) throw new Error("File not found");
-                return response.text();
-              })
-              .then(content => {
-                // 2. Send the text to your typewriter effect
-                typeOutput(content, response);
-              })
-              .catch(err => {
-                response.innerText = `cat: error reading ${arg}`;
-              });
+              .then(res => res.ok ? res.text() : Promise.reject())
+              .then(content => typeOutput(content, response))
+              .catch(() => { response.innerText = `cat: error reading ${arg}`; });
           } else {
             response.innerText = `cat: ${arg || ''}: No such file`;
           }
         } else if (command === 'help') {
-          response.innerText = "Available: ls, cd [dir], cat [file], clear, help";
+          response.innerText = "Available: ls, cd [dir], cat [file], clear, help, whoami";
         } else if (command === 'whoami') {
-          // Manually trigger the fetch for your personal info
           fetch('file_system/personal_info.txt')
             .then(res => res.text())
             .then(content => typeOutput(content, response));
@@ -268,15 +244,16 @@
         }
 
         history.appendChild(response);
-
         const pathString = currentPath.length === 0 ? '~' : `~/${currentPath.join('/')}`;
         promptLabel.innerText = `guest@pc:${pathString}$`;
-
         input.value = '';
+
+        // Final snap to the new prompt line
         window.scrollTo(0, document.body.scrollHeight);
       }
     });
 
+    // Keep focus on input even when clicking elsewhere on the terminal
     document.addEventListener('click', () => input.focus());
   </script>
 </body>
