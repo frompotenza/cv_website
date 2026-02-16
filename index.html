@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Guest@CV: ~</title>
+  <style>
+    body {
+      background-color: #0a0a0a;
+      color: #2ecc71;
+      /* Classic Matrix/Terminal Green */
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      height: 90vh;
+      overflow: hidden;
+      text-shadow: 0 0 5px #2ecc71;
+    }
+
+    /* The CRT scanline effect */
+    body::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      z-index: 2;
+      background-size: 100% 4px, 3px 100%;
+      pointer-events: none;
+    }
+
+    #terminal-history {
+      flex-grow: 1;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-bottom: 10px;
+    }
+
+    .input-line {
+      display: flex;
+      align-items: center;
+    }
+
+    #user-input {
+      background: transparent;
+      border: none;
+      color: #2ecc71;
+      font-family: inherit;
+      font-size: inherit;
+      outline: none;
+      flex-grow: 1;
+      caret-color: #2ecc71;
+    }
+
+    .prompt {
+      color: #8e44ad;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="terminal-history">--- Welcome to OS-CV v1.0.0 ---
+    Type 'help' to see available commands.</div>
+
+  <div class="input-line">
+    <span class="prompt">visitor@cv:~$</span>
+    <input type="text" id="user-input" autofocus autocomplete="off">
+  </div>
+
+  <script>
+    const input = document.getElementById('user-input');
+    const history = document.getElementById('terminal-history');
+
+    const commands = {
+      'help': "Available commands: about, skills, contact, clear",
+      'about': "I am a developer who loves terminal UIs and clean code.",
+      'skills': "Languages: JavaScript, Python, C++ \nTools: Git, Docker, GitHub Actions",
+      'contact': "Email: yourname@example.com \nGitHub: github.com/yourusername"
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const command = input.value.toLowerCase().trim();
+        const output = document.createElement('div');
+
+        // Add the command to history
+        output.innerHTML = `<span style="color:#8e44ad">visitor@cv:~$</span> ${command}`;
+
+        // Add the response
+        const response = document.createElement('div');
+        if (command === 'clear') {
+          history.innerHTML = '';
+        } else if (commands[command]) {
+          response.innerText = commands[command];
+        } else {
+          response.innerText = `Command not found: ${command}. Type 'help' for assistance.`;
+        }
+
+        history.appendChild(output);
+        history.appendChild(response);
+        input.value = '';
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    });
+
+    // Keep input focused
+    document.addEventListener('click', () => input.focus());
+  </script>
+</body>
+
+</html>
