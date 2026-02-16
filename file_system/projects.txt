@@ -1,0 +1,49 @@
+[DEPLOYED PROJECTS & RESEARCH]
+============================================================
+
+PROJECT  :: McGill Robotics - RoboSub AUV
+ROLE     :: Senior Software Engineer
+PERIOD   :: 2023 - 2024
+------------------------------------------------------------
+> Developed autonomous underwater vehicle (AUV) systems 
+  for the international RoboSub competition.
+> Created state machine-based autonomous decision-
+  making processes for task execution based on controls 
+  and vision mapping.
+> Engineered a full quaternion-based PID control system 
+  for high-precision 6-DOF maneuvering.
+> Created simulation environments using Ignition Gazebo 
+  and Unity, seamlessly integrated with ROS.
+> Facilitated AUV deployment and testing in pool, 
+  dry-land, and simulation environments.
+> Developed comprehensive sensor integration and status 
+  check mechanisms.
+> Fully integrated hydrophone for accurate pinger-
+  bearing calculations.
+> TECH: ROS, Unity, Ignition Gazebo, YOLO, C++, Python.
+
+PROJECT  :: Advanced Fish Population Monitoring System
+ROLE     :: Research Project (Prof. Meger)
+PERIOD   :: 2024
+------------------------------------------------------------
+> Designed a computer vision pipeline for detecting and 
+  monitoring aquatic populations in 3D.
+> Implemented geometrical optics calculations to track 
+  precise movements over time from 2D camera feeds.
+> Applied spatial analysis to map habitat preferences and 
+  population distributions.
+> TECH: Computer Vision, 3D Geometry, Spatial Analysis.
+
+PROJECT  :: Prometheus Lab - Algorithm Stress Testing
+ROLE     :: Research Project (Prof. Vybihal)
+PERIOD   :: 2023
+------------------------------------------------------------
+> Investigated the effects of recommendation algorithms on 
+  subgroup behavior.
+> Developed an imitation algorithm that simulated human 
+  interaction patterns based on real-world survey data.
+> Engineered "stress tests" to identify edge cases and 
+  extremes within recommendation systems.
+> TECH: Python, Algorithmic Modeling, Data Analysis.
+
+============================================================

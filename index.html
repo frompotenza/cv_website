@@ -1,48 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <title>Guest@CV: ~</title>
+  <meta charset="UTF-8">
+  <title>felipe@potenza: ~</title>
   <style>
     body {
       background-color: #0a0a0a;
       color: #2ecc71;
-      /* Classic Matrix/Terminal Green */
       font-family: 'Courier New', Courier, monospace;
-      display: flex;
-      flex-direction: column;
       padding: 20px;
-      height: 90vh;
-      overflow: hidden;
+      margin: 0;
+      /* Allow the body to scroll naturally */
+      min-height: 100vh;
+      overflow-y: auto;
       text-shadow: 0 0 5px #2ecc71;
     }
 
-    /* The CRT scanline effect */
+    /* CRT Effect */
     body::before {
       content: " ";
       display: block;
-      position: absolute;
+      position: fixed;
+      /* Fixed so it stays over the viewport while scrolling */
       top: 0;
       left: 0;
       bottom: 0;
       right: 0;
       background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
         linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-      z-index: 2;
+      z-index: 10;
       background-size: 100% 4px, 3px 100%;
       pointer-events: none;
     }
 
-    #terminal-history {
-      flex-grow: 1;
-      overflow-y: auto;
+    #terminal-container {
+      display: block;
+      z-index: 1;
+    }
+
+    #terminal-history div,
+    #terminal-history pre {
       white-space: pre-wrap;
-      margin-bottom: 10px;
+      word-wrap: break-word;
+      margin: 0;
+      /* Removes extra space between blocks */
+      padding: 0;
+      /* Removes internal spacing */
+      line-height: 1.2;
+      /* Forces a tighter, terminal-like vertical rhythm */
+      display: block;
     }
 
     .input-line {
       display: flex;
       align-items: center;
+      margin-top: 5px;
     }
 
     #user-input {
@@ -59,57 +72,208 @@
     .prompt {
       color: #8e44ad;
       margin-right: 10px;
+      font-weight: bold;
+    }
+
+    .dir {
+      color: #3498db;
+      font-weight: bold;
     }
   </style>
-</head>
 
 <body>
+  <div id="terminal-container">
+    <div id="terminal-history">--- Welcome to Felipe Potenza's Interactive CV ---
+      Type 'help' to see available commands.</div>
 
-  <div id="terminal-history">--- Welcome to OS-CV v1.0.0 ---
-    Type 'help' to see available commands.</div>
-
-  <div class="input-line">
-    <span class="prompt">visitor@cv:~$</span>
-    <input type="text" id="user-input" autofocus autocomplete="off">
+    <div class="input-line">
+      <span class="prompt">guest@pc:~$</span>
+      <input type="text" id="user-input" autofocus autocomplete="off">
+    </div>
   </div>
 
   <script>
     const input = document.getElementById('user-input');
     const history = document.getElementById('terminal-history');
+    const promptLabel = document.querySelector('.prompt');
 
-    const commands = {
-      'help': "Available commands: about, skills, contact, clear",
-      'about': "I am a developer who loves terminal UIs and clean code.",
-      'skills': "Languages: JavaScript, Python, C++ \nTools: Git, Docker, GitHub Actions",
-      'contact': "Email: yourname@example.com \nGitHub: github.com/yourusername"
+    // The "Virtual File System"
+    const fileSystem = {
+      'about_me': {
+        'personal_info.txt': "file_system/personal_info.txt",
+        'education.txt': "file_system/education.txt",
+        'languages.txt': "file_system/languages.txt",
+        'hobbies.txt': "file_system/hobbies.txt"
+      },
+      'experience': {
+        'work_experience.txt': "file_system/work_experience.txt.",
+        'projects.txt': "file_system/projects.txt"
+      },
+      'contact.txt': "file_system/contact.txt",
+      'skills.txt': "file_system/skills.txt"
     };
 
+    let currentPath = [];
+
+    function typeOutput(text, element) {
+      let i = 0;
+      // Clean the text: remove \r and trim trailing newlines
+      const cleanText = text.trimEnd().replace(/\r/g, "");
+
+      const interval = setInterval(() => {
+        element.innerText += cleanText.charAt(i);
+        i++;
+        if (i >= cleanText.length) {
+          clearInterval(interval);
+          window.scrollTo(0, document.body.scrollHeight);
+        }
+      }, 10);
+    }
+
+    function getCurrentDir() {
+      return currentPath.reduce((dir, name) => dir[name], fileSystem);
+    }
+
+    let commandHistory = [];
+    let historyIndex = -1;
+    let currentInputBuffer = ""; // Stores what you were typing before you hit 'Up'
+
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const command = input.value.toLowerCase().trim();
-        const output = document.createElement('div');
+      const currentDir = getCurrentDir();
+      const items = Object.keys(currentDir);
 
-        // Add the command to history
-        output.innerHTML = `<span style="color:#8e44ad">visitor@cv:~$</span> ${command}`;
+      // --- ARROW UP (Previous Command) ---
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (commandHistory.length > 0) {
+          if (historyIndex === -1) {
+            currentInputBuffer = input.value; // Save current progress
+          }
 
-        // Add the response
-        const response = document.createElement('div');
-        if (command === 'clear') {
-          history.innerHTML = '';
-        } else if (commands[command]) {
-          response.innerText = commands[command];
+          if (historyIndex < commandHistory.length - 1) {
+            historyIndex++;
+            input.value = commandHistory[commandHistory.length - 1 - historyIndex];
+          }
+        }
+      }
+
+      // --- ARROW DOWN (Next Command) ---
+      else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (historyIndex > 0) {
+          historyIndex--;
+          input.value = commandHistory[commandHistory.length - 1 - historyIndex];
+        } else if (historyIndex === 0) {
+          historyIndex = -1;
+          input.value = currentInputBuffer; // Restore what you were typing
+        }
+      }
+
+      // --- TAB COMPLETION ---
+      else if (e.key === 'Tab') {
+        e.preventDefault();
+        const parts = input.value.split(' ');
+        const lastPart = parts[parts.length - 1].toLowerCase();
+        const matches = items.filter(item => item.toLowerCase().startsWith(lastPart));
+
+        if (matches.length === 1) {
+          parts[parts.length - 1] = matches[0];
+          input.value = parts.join(' ');
+        } else if (matches.length > 1) {
+          const hint = document.createElement('div');
+          hint.style.color = '#7f8c8d';
+          hint.innerText = matches.join('   ');
+          history.appendChild(hint);
+          window.scrollTo(0, document.body.scrollHeight);
+        }
+      }
+
+      // --- ENTER KEY ---
+      else if (e.key === 'Enter') {
+        const fullInput = input.value.trim();
+
+        if (fullInput) {
+          // Add to history and reset index
+          commandHistory.push(fullInput);
+          historyIndex = -1;
+          currentInputBuffer = "";
         } else {
-          response.innerText = `Command not found: ${command}. Type 'help' for assistance.`;
+          // Allow empty Enter to just move to next line like a real terminal
+          const blankLine = document.createElement('div');
+          blankLine.innerHTML = `<span style="color:#8e44ad">${promptLabel.innerText}</span>`;
+          history.appendChild(blankLine);
+          input.value = '';
+          return;
         }
 
-        history.appendChild(output);
+        const [command, ...args] = fullInput.toLowerCase().split(' ');
+        const arg = args[0];
+
+        const outputLine = document.createElement('div');
+        outputLine.innerHTML = `<span style="color:#8e44ad">${promptLabel.innerText}</span> ${fullInput}`;
+        history.appendChild(outputLine);
+
+        const response = document.createElement('div');
+        const currentDir = getCurrentDir();
+
+        if (command === 'clear') {
+          history.innerHTML = "--- Welcome to Felipe Potenza's Interactive CV ---\nType 'help' to see available commands.";
+          window.scrollTo(0, 0);
+        } else if (command === 'ls') {
+          const formattedItems = Object.keys(currentDir).map(item =>
+            typeof currentDir[item] === 'object' ? `<span class="dir">${item}/</span>` : item
+          );
+          response.innerHTML = formattedItems.join(' &nbsp; ');
+        } else if (command === 'cd') {
+          if (!arg || arg === '~') {
+            currentPath = [];
+          } else if (arg === '..') {
+            currentPath.pop();
+          } else if (currentDir[arg] && typeof currentDir[arg] === 'object') {
+            currentPath.push(arg);
+          } else {
+            response.innerText = `cd: no such directory: ${arg}`;
+          }
+        } else if (command === 'cat') {
+          const filePath = currentDir[arg];
+          if (filePath && typeof filePath === 'string') {
+            // 1. Fetch the file content
+            fetch(filePath)
+              .then(response => {
+                if (!response.ok) throw new Error("File not found");
+                return response.text();
+              })
+              .then(content => {
+                // 2. Send the text to your typewriter effect
+                typeOutput(content, response);
+              })
+              .catch(err => {
+                response.innerText = `cat: error reading ${arg}`;
+              });
+          } else {
+            response.innerText = `cat: ${arg || ''}: No such file`;
+          }
+        } else if (command === 'help') {
+          response.innerText = "Available: ls, cd [dir], cat [file], clear, help";
+        } else if (command === 'whoami') {
+          // Manually trigger the fetch for your personal info
+          fetch('file_system/personal_info.txt')
+            .then(res => res.text())
+            .then(content => typeOutput(content, response));
+        } else {
+          response.innerText = `-bash: ${command}: command not found`;
+        }
+
         history.appendChild(response);
+
+        const pathString = currentPath.length === 0 ? '~' : `~/${currentPath.join('/')}`;
+        promptLabel.innerText = `guest@pc:${pathString}$`;
+
         input.value = '';
         window.scrollTo(0, document.body.scrollHeight);
       }
     });
 
-    // Keep input focused
     document.addEventListener('click', () => input.focus());
   </script>
 </body>

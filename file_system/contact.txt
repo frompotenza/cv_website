@@ -1,0 +1,8 @@
+[COMMUNICATION PROTOCOLS]
+------------------------------------------------------------
+EMAIL    : potenza.fontes@email.com
+LINKEDIN : linkedin.com/in/felipepotenza
+GITHUB   : github.com/frompotenza
+LOCATION : Stuttgart, DE
+------------------------------------------------------------
+STATUS   : Listening for connections...

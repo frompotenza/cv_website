@@ -1,0 +1,14 @@
+[SYSTEM USER PROFILE]
+------------------------------------------------------------
+USER:          Felipe Potenza
+ROLE:          Computer Vision & Autonomous Robotics Engineer
+LOCATION:      Stuttgart, Germany
+UPTIME:        24 Years
+SHELL:         zsh / bash
+STATUS:        OPEN_FOR_WORK
+
+BIO:
+I am a Master's student specializing in autonomous systems, with 
+hands-on experience working with medical robots, autonomous 
+underwater vehicles (AUVs), and drones. My core interests lie in 
+computer vision, autonomous planning, and virtual reality.

@@ -1,0 +1,6 @@
+[HUMAN LANGUAGES]
+------------------------------------------------------------
+Portuguese        : Native Speaker
+English           : Fluent
+German            : Beginner A2 (in progress)
+------------------------------------------------------------

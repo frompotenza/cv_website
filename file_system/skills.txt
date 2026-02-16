@@ -1,0 +1,23 @@
+[SYSTEM CAPABILITIES]
+============================================================
+
+> LANGUAGES:
+  Python, C++, C#, C, Java
+
+> AUTONOMOUS SYSTEMS & ROBOTICS:
+  - Frameworks: ROS1 (Noetic), ROS2 (Humble) 
+  - Tools     : RViz, RQt
+  - Simulation: Gazebo (Classic/Ignition), Unity, MuJoCo 
+  - Algorithms: (V)SLAM, PID Control, Kalman Filters,
+                Autonomous Planning, Point Cloud 
+
+> AI:
+  - Models    : YOLO, V-JEPA, CNNs, Transformes, etc.
+  - Libraries : PyTorch, OpenCV, Scikit-Learn
+  - Domain    : Computer Vision, World Models
+
+> VR/MR:
+  - Hardware  : HoloLens2, HTC Vive Pro, Meta Quest
+  - Software  : Unity (C#), OpenXR, Mixed Reality Toolkit (MRTK)
+
+============================================================
